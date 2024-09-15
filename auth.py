@@ -9,7 +9,7 @@ def login():
     if not google.authorized:
         return redirect(url_for('google.login'))
     
-    resp = google.get('/oauth2/v1/userinfo')
+    resp = google.get('/oauth2/v2/userinfo')
     assert resp.ok, resp.text
     user_info = resp.json()
     print("\n\nUser Info\n\n")
@@ -31,7 +31,7 @@ def google_authorized():
     if not google.authorized:
         return redirect(url_for('google.login'))
     
-    resp = google.get('/oauth2/v1/userinfo')
+    resp = google.get('/oauth2/v2/userinfo')
     assert resp.ok, resp.text
     user_info = resp.json()
     
