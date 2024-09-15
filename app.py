@@ -21,7 +21,7 @@ CLIENT_SECRET = app.config['GOOGLE_OAUTH_CLIENT_SECRET']
 
 DATA = {
     'response_type': "code",
-    'redirect_uri': "https://127.0.0.1:5000/home",
+    'redirect_uri': "https://www.backend.myassembly.co/home",
     'scope': 'https://www.googleapis.com/auth/userinfo.email',
     'client_id': CLIENT_ID,
     'prompt': 'consent'
