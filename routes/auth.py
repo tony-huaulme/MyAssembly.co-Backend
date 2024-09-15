@@ -3,8 +3,8 @@ from flask_dance.contrib.google import make_google_blueprint, google
 from config import Config
 
 blueprint = make_google_blueprint(
-    client_id=Config.GOOGLE_CLIENT_ID,
-    client_secret=Config.GOOGLE_CLIENT_SECRET,
+    client_id=Config.GOOGLE_OAUTH_CLIENT_ID,
+    client_secret=Config.GOOGLE_OAUTH_CLIENT_SECRET,
     scope=["profile", "email"]
 )
 
