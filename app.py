@@ -19,10 +19,6 @@ app.add_url_rule('/login/google', view_func=login_with_google, methods=['GET'])
 app.add_url_rule('/signup/emailpw', view_func=signup_emailpw, methods=['POST'])
 app.add_url_rule('/login/emailpw', view_func=login_emailpw, methods=['POST'])
 
-# Initialize extensions
-db.init_app(app)
-
-
 
 # Initialize extensions
 db.init_app(app)
