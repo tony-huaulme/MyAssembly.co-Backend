@@ -2,7 +2,6 @@ import json
 import requests
 from flask import Flask, redirect, request
 from oauthlib import oauth2
-from flask_sqlalchemy import SQLAlchemy
 from models.models import db, User
 from config import Config
 from io import BytesIO
@@ -16,7 +15,6 @@ app.config.from_object(Config)
 # Google OAuth2 configuration
 CLIENT_ID = app.config['GOOGLE_OAUTH_CLIENT_ID']
 CLIENT_SECRET = app.config['GOOGLE_OAUTH_CLIENT_SECRET']
-
 
 
 DATA = {

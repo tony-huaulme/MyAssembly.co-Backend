@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, url_for, session, request
 from oauthlib.oauth2 import WebApplicationClient
 from requests_oauthlib import OAuth2Session
-from models import db, User
+from models.models import db, User
 import os
 
 auth_bp = Blueprint('auth', __name__)
@@ -48,9 +48,10 @@ def google_authorized():
     oauth_session = OAuth2Session(CLIENT_ID, token=token_json)
     user_info_response = oauth_session.get(USER_INFO_URL)
     user_info = user_info_response.json()
-
+    print(user_info)
     user = User.query.filter_by(email=user_info.get("email")).first()
     if not user:
+        print("Creating new user")
         user = User(username=user_info.get("name"), email=user_info.get("email"), google_id=user_info.get("sub"))
         db.session.add(user)
         db.session.commit()
