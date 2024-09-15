@@ -1,5 +1,0 @@
-Flask
-Flask-SQLAlchemy
-Flask-Dance
-psycopg2
-gunicorn
