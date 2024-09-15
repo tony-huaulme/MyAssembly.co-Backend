@@ -111,8 +111,11 @@
 
 from flask import Flask, redirect, url_for
 from flask_dance.contrib.google import make_google_blueprint, google
+from config import Config
+
 
 app = Flask(__name__)
+app.config.from_object(Config)
 
 google_bp = make_google_blueprint(
     client_id=app.config['GOOGLE_OAUTH_CLIENT_ID'],
