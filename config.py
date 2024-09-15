@@ -1,7 +1,13 @@
-# from dotenv import load_dotenv
 import os
 
-# load_dotenv()
+# Try to import and load dotenv only if available
+try:
+    from dotenv import load_dotenv
+    load_dotenv()  # Load environment variables from .env file
+    print("Loaded .env file")
+except ModuleNotFoundError:
+    # If dotenv is not available, skip loading the .env file
+    print("dotenv not found, skipping .env loading")
 
 class Config:
     # Flask config
@@ -21,5 +27,3 @@ class Config:
     OAUTHLIB_INSECURE_TRANSPORT = True  # Only for development, disable in production
     GOOGLE_OAUTH_CLIENT_ID = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
     GOOGLE_OAUTH_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
-
-    
