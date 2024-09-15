@@ -3,7 +3,7 @@ import requests
 from flask import Flask, redirect, request
 from oauthlib import oauth2
 from flask_sqlalchemy import SQLAlchemy
-from models import db, User
+from models.models import db, User
 from config import Config
 from io import BytesIO
 import boto3
