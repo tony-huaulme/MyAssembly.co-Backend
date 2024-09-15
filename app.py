@@ -1,14 +1,21 @@
-from flask import Flask, request
-from models.models import db, User
+from flask import Flask, request, render_template
+from models.models import db, AppUser, Project, SharedProject, File3D, ProjectSettings
 from config import Config
 from flask import jsonify
 from flask_migrate import Migrate, upgrade, migrate
+from sqlalchemy import inspect, text
+
 from routes.file import handle_file
 from routes.auth import google_auth_callback, login_with_google, login_emailpw, signup_emailpw
+from routes.test import test
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
+
+
+
+# Add routes for file handling
 app.add_url_rule('/files/<path:filename>', view_func=handle_file, methods=['GET', 'POST', 'DELETE'])
 
 # Add routes for OAuth
@@ -19,30 +26,94 @@ app.add_url_rule('/login/google', view_func=login_with_google, methods=['GET'])
 app.add_url_rule('/signup/emailpw', view_func=signup_emailpw, methods=['POST'])
 app.add_url_rule('/login/emailpw', view_func=login_emailpw, methods=['POST'])
 
+#addding test route
+app.add_url_rule('/test', view_func=test, methods=['GET'])
+
 
 # Initialize extensions
 db.init_app(app)
 migrate = Migrate(app, db)
 
-@app.route('/resetdb', methods=['POST'])
-def reset_db():
+
+
+
+
+@app.route('/projects', methods=['POST'])
+def create_project():
+    data = request.get_json()
+    print("\n\n",data, "\n\n")  # Debugging line
+    if not data:
+        return jsonify({"message": "No input data provided"}), 400
+
+    user_id = data.get('user_id')
+    project_name = data.get('project_name')
+    description = data.get('description')
+    s3_folder = data.get('s3_folder')
+
+    # Check if required fields are provided
+    if not user_id or not project_name or not s3_folder:
+        return jsonify({"message": "User ID, project name, and S3 folder are required"}), 400
+
+    # Check if the user exists in the database
+    user = AppUser.query.get(user_id)
+    if not user:
+        return jsonify({"message": f"User with ID {user_id} does not exist."}), 400
+
     try:
-        # Drop all tables
-        db.drop_all()
-        # Create all tables
-        db.create_all()
-        # Apply migrations
-        with app.app_context():
-            migrate.upgrade()
-        return jsonify({'message': 'Database reset and upgraded successfully.'}), 200
+        new_project = Project(
+            user_id=user_id,
+            project_name=project_name,
+            description=description,
+            s3_folder=s3_folder
+        )
+        db.session.add(new_project)
+        db.session.commit()
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print("Error: ", e)
+        return jsonify({"message": str(e)}), 400
+
+    return jsonify({
+        "id": new_project.id,
+        "user_id": new_project.user_id,
+        "project_name": new_project.project_name,
+        "description": new_project.description,
+        "s3_folder": new_project.s3_folder,
+        "created_at": new_project.created_at.isoformat(),
+        "updated_at": new_project.updated_at.isoformat()
+    }), 201
+
+
+
+
+def get_all_tables_data(limit=10):
+    inspector = inspect(db.engine)
+    tables = inspector.get_table_names()
+    table_data = {}
+    print(f"Tables: {tables}")  # Debugging line
+    for table in tables:
+        query = text(f"SELECT * FROM {table} LIMIT {limit}")
+        print(f"Executing query: {query} with limit {limit}")  # Debugging line
+        result = db.session.execute(query, {"limit": limit}).fetchall()
+        print(f"Result: {result}")  # Debugging line
+
+        columns = [col['name'] for col in inspector.get_columns(table)]
+
+        table_data[table] = (columns, result)
+
+    return table_data
+
+@app.route('/dbui', methods=['GET'])
+def rendertables():
+    tables_data = get_all_tables_data(limit=10)
+    return render_template('index.html', tables_data=tables_data)
+
+
 
 
 # Define a route where we see if user logged in if so show his email console
 @app.route('/users', methods=['GET'])
 def get_users():
-    users = User.query.all()
+    users = AppUser.query.all()
     users_list = [{'id': user.id, 'username': user.username, 'email': user.email} for user in users]
     return jsonify(users_list)
 
@@ -55,16 +126,15 @@ def add_user():
         return jsonify({'error': 'Missing username or email'}), 400
     
     # Check if user already exists
-    user = User.query.filter_by(email=email).first()
+    user = AppUser.query.filter_by(email=email).first()
     if user:
         return jsonify({'error': 'User already exists'}), 409
     
 
-    new_user = User(username=username, email=email)
+    new_user = AppUser(username=username, email=email)
     db.session.add(new_user)
     db.session.commit()
     return jsonify({'message': 'User added successfully', 'user': {'id': new_user.id, 'username': new_user.username, 'email': new_user.email}}), 201
-
 
 
 
@@ -73,4 +143,5 @@ with app.app_context():
     db.create_all()
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000, ssl_context='adhoc')
+    #params to run https
+    app.run(debug=True, host='0.0.0.0', port=5000, ssl_context=('adhoc'))

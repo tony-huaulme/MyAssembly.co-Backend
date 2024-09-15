@@ -2,7 +2,7 @@ import json
 import requests
 from flask import jsonify, redirect, request
 from oauthlib import oauth2
-from models.models import db, User
+from models.models import db, AppUser
 from config import Config
 
 # Google OAuth2 configuration
@@ -57,9 +57,9 @@ def google_auth_callback():
     info = response_user_info.json()
 
     # Check if user already exists
-    user = User.query.filter_by(email=info['email']).first()
+    user = AppUser.query.filter_by(email=info['email']).first()
     if not user:
-        new_user = User(username=info['name'], email=info['email'])
+        new_user = AppUser(username=info['name'], email=info['email'])
         db.session.add(new_user)
         db.session.commit()
 
@@ -69,19 +69,19 @@ def google_auth_callback():
 #EMAIL-PASSWORD-AUTH
 def signup_emailpw():
     data = request.json
-    email = data.get('email')
+    email = data.get('email').lower()
     password = data.get('password')
 
     if not email or not password:
         return jsonify({'error': 'Missing username, email, or password'}), 400
 
     # Check if user already exists
-    user = User.query.filter_by(email=email).first()
+    user = AppUser.query.filter_by(email=email).first()
     if user:
         return jsonify({'error': 'User already exists'}), 409
 
     # Create new user and hash the password
-    new_user = User(email=email)
+    new_user = AppUser(email=email)
     new_user.set_password(password)
     
     db.session.add(new_user)
@@ -92,14 +92,14 @@ def signup_emailpw():
 
 def login_emailpw():
     data = request.json
-    email = data.get('email')
+    email = data.get('email').lower()
     password = data.get('password')
 
     if not email or not password:
         return jsonify({'error': 'Missing email or password'}), 400
 
     # Find user by email
-    user = User.query.filter_by(email=email).first()
+    user = AppUser.query.filter_by(email=email).first()
     if user is None or not user.check_password(password):
         return jsonify({'error': 'Invalid credentials'}), 401
 

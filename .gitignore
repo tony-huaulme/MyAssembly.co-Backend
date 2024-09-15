@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 
+manage_migrations.py
+migrations
 __pycache__/
 .env
 todo.todo
