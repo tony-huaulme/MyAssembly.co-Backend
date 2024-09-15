@@ -21,7 +21,7 @@ app.register_blueprint(auth_bp)  # Registering the auth_bp blueprint
 google_bp = make_google_blueprint(
     client_id=app.config['GOOGLE_OAUTH_CLIENT_ID'],
     client_secret=app.config['GOOGLE_OAUTH_CLIENT_SECRET'],
-    redirect_to='google_authorized',
+    redirect_to='auth.google_authorized',
     scope=['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'] 
 )
 app.register_blueprint(google_bp, url_prefix='/login')
