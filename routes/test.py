@@ -1,4 +1,4 @@
-from models.models import db, AppUser, Project, SharedProject, File3D, ProjectSettings
+from models.models import db, AppUser, Project, SharedProject, File3D
 from flask import jsonify
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 import string
@@ -10,7 +10,7 @@ def test():
         'Project': test_project(),
         'SharedProject': test_shared_project(),
         'File3D': test_file3d(),
-        'ProjectSettings': test_project_settings()
+       
     }
     return jsonify(test_results), 200
 
@@ -170,42 +170,3 @@ def test_file3d():
         db.session.rollback()
         return f"Failed: {str(e)}"
 
-def test_project_settings():
-    try:
-        # Generate a unique email for the user
-        unique_email = f"settings_user_{generate_random_string()}@example.com"
-        new_user = AppUser(username="settings_user", email=unique_email)
-        db.session.add(new_user)
-        db.session.commit()
-
-        # Create a new project for the user
-        new_project = Project(user_id=new_user.id, project_name="Settings Project", s3_folder="s3://settings/project")
-        db.session.add(new_project)
-        db.session.commit()
-
-        # Create a unique S3 settings URL
-        unique_s3_settings_url = f"s3://settings/project/config_{generate_random_string()}.json"
-        settings = ProjectSettings(project_id=new_project.id, s3_settings_url=unique_s3_settings_url)
-
-        # Check if the settings URL already exists
-        if ProjectSettings.query.filter_by(s3_settings_url=unique_s3_settings_url).first():
-            raise ValueError(f"ProjectSettings with URL '{unique_s3_settings_url}' already exists.")
-
-        db.session.add(settings)
-        db.session.commit()
-
-        # Query the ProjectSettings
-        project_settings = ProjectSettings.query.filter_by(s3_settings_url=unique_s3_settings_url).first()
-        if not project_settings:
-            raise ValueError("ProjectSettings creation failed.")
-
-        return "Passed"
-    except IntegrityError as e:
-        db.session.rollback()
-        return f"Failed: IntegrityError - {str(e)}"
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        return f"Failed: SQLAlchemyError - {str(e)}"
-    except Exception as e:
-        db.session.rollback()
-        return f"Failed: {str(e)}"

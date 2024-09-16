@@ -1,14 +1,13 @@
-from flask import Flask, request, render_template
-from models.models import db, AppUser, Project, SharedProject, File3D, ProjectSettings
+from flask import Flask, request
+from models.models import db, AppUser, Project, SharedProject, File3D
 from config import Config
 from flask import jsonify
-from flask_migrate import Migrate, upgrade, migrate
-from sqlalchemy import inspect, text
+from flask_migrate import Migrate
 
 from routes.file import handle_file
 from routes.auth import google_auth_callback, login_with_google, login_emailpw, signup_emailpw
 from routes.test import test
-
+from routes.admin import rendertables
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -18,17 +17,22 @@ app.config.from_object(Config)
 # Add routes for file handling
 app.add_url_rule('/files/<path:filename>', view_func=handle_file, methods=['GET', 'POST', 'DELETE'])
 
+###########################################
+########## AUTHENTICATION ROUTES ##########
+###########################################
 # Add routes for OAuth
 app.add_url_rule('/auth/callback', view_func=google_auth_callback, methods=['GET'])
 app.add_url_rule('/login/google', view_func=login_with_google, methods=['GET'])
-
 # Add routes for email-password auth
 app.add_url_rule('/signup/emailpw', view_func=signup_emailpw, methods=['POST'])
 app.add_url_rule('/login/emailpw', view_func=login_emailpw, methods=['POST'])
 
+###########################################
+################ TEST-ADMIN ###############
+###########################################
 #addding test route
 app.add_url_rule('/test', view_func=test, methods=['GET'])
-
+app.add_url_rule('/dbui', view_func=rendertables, methods=['GET'])
 
 # Initialize extensions
 db.init_app(app)
@@ -84,28 +88,6 @@ def create_project():
 
 
 
-
-def get_all_tables_data(limit=10):
-    inspector = inspect(db.engine)
-    tables = inspector.get_table_names()
-    table_data = {}
-    print(f"Tables: {tables}")  # Debugging line
-    for table in tables:
-        query = text(f"SELECT * FROM {table} LIMIT {limit}")
-        print(f"Executing query: {query} with limit {limit}")  # Debugging line
-        result = db.session.execute(query, {"limit": limit}).fetchall()
-        print(f"Result: {result}")  # Debugging line
-
-        columns = [col['name'] for col in inspector.get_columns(table)]
-
-        table_data[table] = (columns, result)
-
-    return table_data
-
-@app.route('/dbui', methods=['GET'])
-def rendertables():
-    tables_data = get_all_tables_data(limit=10)
-    return render_template('index.html', tables_data=tables_data)
 
 
 
