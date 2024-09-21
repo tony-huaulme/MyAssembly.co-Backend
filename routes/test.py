@@ -61,7 +61,7 @@ def test_project():
         db.session.commit()
 
         # Create a new project for the user
-        new_project = Project(user_id=new_user.id, project_name="Test Project", s3_folder="s3://test/project")
+        new_project = Project(user_id=new_user.id, project_name="Test Project", file3d_link="s3://test/project")
 
         # Check if project name already exists for this user
         if Project.query.filter_by(user_id=new_user.id, project_name=new_project.project_name).first():
@@ -99,13 +99,13 @@ def test_shared_project():
         db.session.commit()
 
         # Create a new project for the user
-        new_project = Project(user_id=new_user.id, project_name="Shared Project", s3_folder="s3://shared/project")
+        new_project = Project(user_id=new_user.id, project_name="Shared Project", file3d_link="s3://shared/project")
         db.session.add(new_project)
         db.session.commit()
 
         # Create a unique share link
         unique_share_link = f"http://example.com/shared/{generate_random_string()}"
-        shared_project = SharedProject(project_id=new_project.id, share_link=unique_share_link, access_permissions="read-only")
+        shared_project = SharedProject(project_id=new_project.id, share_link=unique_share_link)
 
         # Check if the share link already exists
         if SharedProject.query.filter_by(share_link=unique_share_link).first():
@@ -139,7 +139,7 @@ def test_file3d():
         db.session.commit()
 
         # Create a new project for the user
-        new_project = Project(user_id=new_user.id, project_name="3D File Project", s3_folder="s3://3dfile/project")
+        new_project = Project(user_id=new_user.id, project_name="3D File Project", file3d_link="s3://3dfile/project",file_size=100)
         db.session.add(new_project)
         db.session.commit()
 

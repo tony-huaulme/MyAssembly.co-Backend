@@ -1,19 +1,23 @@
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 from config import Config
-from models.models import db, AppUser, Project, SharedProject, File3D, ProjectSettings
-from sqlalchemy import create_engine
-from sqlalchemy.sql import text
 
-# Get the database URL from the config
-DATABASE_URL = Config.SQLALCHEMY_DATABASE_URI
 
-# Create an engine using the database URL
-engine = create_engine(DATABASE_URL)
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
+db = SQLAlchemy(app)
 
-# Manually truncate all tables
-with engine.connect() as connection:
-    connection.execute(text("TRUNCATE file3d, shared_project, project_settings, project, appuser RESTART IDENTITY CASCADE;"))
+# Define your models here as needed
 
-# Recreate all tables based on the new models (optional if they are still in place)
-db.metadata.create_all(engine)
+# Import your models
+from models.models import AppUser, Project, SharedProject, File3D
 
-print("Database has been reset successfully.")
+
+
+def create_all():
+    with app.app_context():
+        db.create_all()
+        print("All tables have been created.")
+
+if __name__ == "__main__":
+    create_all()

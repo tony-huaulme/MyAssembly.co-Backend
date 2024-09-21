@@ -3,15 +3,23 @@ from models.models import db, AppUser, Project, SharedProject, File3D
 from config import Config
 from flask import jsonify
 from flask_migrate import Migrate
+from flask_cors import CORS
 
 from routes.file import handle_file
-from routes.auth import google_auth_callback, login_with_google, login_emailpw, signup_emailpw
+from routes.auth import google_auth_callback, google_auth, login_emailpw, signup_emailpw
 from routes.test import test
 from routes.admin import rendertables
+
+
+
 app = Flask(__name__)
 app.config.from_object(Config)
 
-
+# Setup CORS with dynamic origins
+if app.config["ENV"] == "production":
+    CORS(app, origins=["https://www.myassembly.co", "https://myassembly.co"])
+else:
+    CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 
 # Add routes for file handling
@@ -22,7 +30,7 @@ app.add_url_rule('/files/<path:filename>', view_func=handle_file, methods=['GET'
 ###########################################
 # Add routes for OAuth
 app.add_url_rule('/auth/callback', view_func=google_auth_callback, methods=['GET'])
-app.add_url_rule('/login/google', view_func=login_with_google, methods=['GET'])
+app.add_url_rule('/google_auth', view_func=google_auth, methods=['GET'])
 # Add routes for email-password auth
 app.add_url_rule('/signup/emailpw', view_func=signup_emailpw, methods=['POST'])
 app.add_url_rule('/login/emailpw', view_func=login_emailpw, methods=['POST'])
@@ -68,7 +76,6 @@ def create_project():
             user_id=user_id,
             project_name=project_name,
             description=description,
-            s3_folder=s3_folder
         )
         db.session.add(new_project)
         db.session.commit()
@@ -96,7 +103,7 @@ def create_project():
 @app.route('/users', methods=['GET'])
 def get_users():
     users = AppUser.query.all()
-    users_list = [{'id': user.id, 'username': user.username, 'email': user.email} for user in users]
+    users_list = [{'id': user.id, 'username': user.username, 'email': user.email, 'password_hash':user.password_hash} for user in users]
     return jsonify(users_list)
 
 @app.route('/users', methods=['POST'])

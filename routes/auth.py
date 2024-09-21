@@ -1,6 +1,6 @@
 import json
 import requests
-from flask import jsonify, redirect, request
+from flask import jsonify, redirect, request, make_response
 from oauthlib import oauth2
 from models.models import db, AppUser
 from config import Config
@@ -34,8 +34,8 @@ REQ_URI = CLIENT.prepare_request_uri(
 )
 
 #GOOGLE-AUTH
-def login_with_google():
-    return redirect(REQ_URI)
+def google_auth():
+    return jsonify({'redirect_url': REQ_URI}), 200
 
 def google_auth_callback():
     code = request.args.get('code')
@@ -58,12 +58,19 @@ def google_auth_callback():
 
     # Check if user already exists
     user = AppUser.query.filter_by(email=info['email']).first()
+    new_user = False
     if not user:
         new_user = AppUser(username=info['name'], email=info['email'])
         db.session.add(new_user)
         db.session.commit()
 
-    return jsonify({"email": info['email'], "username": info['name']})
+        
+    # response = make_response(redirect(f"{'http://localhost:3000' if Config.ENV == 'development' else 'https://www.myassembly.co'}/authenticated"))
+    # response.set_cookie('user_email', info['email'], domain=".myassembly.co", secure=True, httponly=False)
+    # response.set_cookie('user_name', info['name'], domain=".myassembly.co", secure=True, httponly=False)
+
+    response = make_response(redirect(f"{'http://localhost:3000' if Config.ENV == 'development' else 'https://www.myassembly.co'}/authenticated?user_email={info['email']}&user_name={info['name']}&new_user={new_user}"))
+    return response
 
 
 #EMAIL-PASSWORD-AUTH
