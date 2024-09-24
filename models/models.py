@@ -28,27 +28,36 @@ class AppUser(db.Model):
         return f"<AppUser {self.username}>"
 
 
+from datetime import datetime, timezone
+
 class Project(db.Model):
-    __tablename__ = 'project'  # Define the table name
+    __tablename__ = 'project'
     
     id = db.Column(db.Integer, primary_key=True)
-    
-    # Foreign key linking project to a user
     user_id = db.Column(db.Integer, db.ForeignKey('appuser.id'), nullable=False)
+    project_name = db.Column(db.String(150), nullable=False)
+    file3d_link = db.Column(db.String(300), nullable=False)
+    settings = db.Column(db.JSON, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     
-    # Project details
-    project_name = db.Column(db.String(150), nullable=False)  # Required project name
-    file3d_link = db.Column(db.String(300), nullable=False)  # Path to the S3 file storage
-    settings = db.Column(db.JSON, nullable=True)  # Optional project settings        
-    # Timestamps
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))  # Project creation time
-    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))  # Last update time
-    
-    # Relationship to the user
     user = db.relationship('AppUser', backref=db.backref('projects', lazy=True))
 
     def __repr__(self):
         return f"<Project {self.project_name}>"
+    
+    # Add this method to serialize the project object into a dictionary
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'project_name': self.project_name,
+            'file3d_link': self.file3d_link,
+            'settings': self.settings,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
 
 
 class SharedProject(db.Model):

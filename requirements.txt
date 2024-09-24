@@ -6,3 +6,4 @@ gunicorn
 boto3
 flask-migrate
 flask_cors
+Flask-Limiter

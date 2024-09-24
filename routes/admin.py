@@ -1,7 +1,6 @@
 from sqlalchemy import inspect, text
 from models.models import db
-from flask import Flask, request, render_template
-
+from flask import render_template, session, jsonify
 
 def get_all_tables_data(limit=100):
     inspector = inspect(db.engine)
@@ -21,5 +20,9 @@ def get_all_tables_data(limit=100):
     return table_data
 
 def rendertables():
+
+    if session.get('user_id') != 50:
+        return jsonify({"error": "Not authorized"})
+
     tables_data = get_all_tables_data(limit=100)
     return render_template('index.html', tables_data=tables_data)
