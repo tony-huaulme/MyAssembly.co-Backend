@@ -35,50 +35,12 @@ REQ_URI = CLIENT.prepare_request_uri(
 )
 
 #GOOGLE-AUTH
-def google_auth():
-    return jsonify({'redirect_url': REQ_URI}), 200
+
 
 
 #EMAIL-PASSWORD-AUTH
-def signup_emailpw():
-    data = request.json
-    email = data.get('email').lower()
-    password = data.get('password')
-
-    if not email or not password:
-        return jsonify({'error': 'Missing username, email, or password'}), 400
-
-    # Check if user already exists
-    user = AppUser.query.filter_by(email=email).first()
-    if user:
-        return jsonify({'error': 'User already exists'}), 409
-
-    # Create new user and hash the password
-    new_user = AppUser(email=email)
-    new_user.set_password(password)
-    
-    db.session.add(new_user)
-    db.session.commit()
-
-    return jsonify({'message': 'User registered successfully', 'id': new_user.id, 'email': new_user.email}), 201
 
 
-def login_emailpw():
-    data = request.json
-    email = data.get('email').lower()
-    password = data.get('password')
-
-    if not email or not password:
-        return jsonify({'error': 'Missing email or password'}), 400
-
-    # Find user by email
-    user = AppUser.query.filter_by(email=email).first()
-    if user is None or not user.check_password(password):
-        return jsonify({'error': 'Invalid credentials'}), 401
-    
-
-    session['user_id'] = user.id
-    return jsonify({'message': 'Login successful', 'user': {'id': user.id, 'username': user.username, 'email': user.email}}), 200
 
 
 
@@ -129,17 +91,49 @@ def add_auth_routes(app, limiter):
     @app.route('/google_auth', methods=['GET'])
     @limiter.limit("5 per minute")
     def google_auth():
-        # Your existing google_auth logic here
-        pass
+        return jsonify({'redirect_url': REQ_URI}), 200
 
     @app.route('/signup/emailpw', methods=['POST'])
     @limiter.limit("5 per minute")
     def signup_emailpw():
-        # Your existing signup logic here
-        pass
+        data = request.json
+        email = data.get('email').lower()
+        password = data.get('password')
+
+        if not email or not password:
+            return jsonify({'error': 'Missing username, email, or password'}), 400
+
+        # Check if user already exists
+        user = AppUser.query.filter_by(email=email).first()
+        if user:
+            return jsonify({'error': 'User already exists'}), 409
+
+        # Create new user and hash the password
+        new_user = AppUser(email=email)
+        new_user.set_password(password)
+        
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({'message': 'User registered successfully', 'id': new_user.id, 'email': new_user.email}), 201
+
 
     @app.route('/login/emailpw', methods=['POST'])
     @limiter.limit("5 per minute")
     def login_emailpw():
-        # Your existing login logic here
-        pass
+        data = request.json
+        email = data.get('email').lower()
+        password = data.get('password')
+
+        if not email or not password:
+            return jsonify({'error': 'Missing email or password'}), 400
+
+        # Find user by email
+        user = AppUser.query.filter_by(email=email).first()
+        if user is None or not user.check_password(password):
+            return jsonify({'error': 'Invalid credentials'}), 401
+        
+
+        session['user_id'] = user.id
+        return jsonify({'message': 'Login successful', 'user': {'id': user.id, 'username': user.username, 'email': user.email}}), 200
+
