@@ -16,18 +16,12 @@ if app.config["ENV"] == "production":
 else:
     CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
-# Initialize Flask-Limiter
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=["5 per minute"]
-)
 
 @app.before_request
 def require_login():
     # Check if the route is not public
-    if not session.get('user_id') and request.endpoint not in ['/auth/callback', '/google_auth', '/signup/emailpw', '/login/emailpw']:
-        return jsonify({"error": "Not authorized"}), 401
+    if not session.get('user_id') and request.endpoint not in ['auth_callback', 'google_auth', 'signup_emailpw', 'login_emailpw']:
+        return jsonify({"error": "Not authorized, AuthREQUIERED"}), 401
 
 # Initialize extensions
 db.init_app(app)
@@ -41,7 +35,7 @@ from routes.user import add_user_routes
 
 
 # Add authentication routes
-add_auth_routes(app, limiter)
+add_auth_routes(app)
 
 # Add project routes
 add_project_routes(app)
@@ -57,5 +51,5 @@ if __name__ == "__main__":
     if app.config["ENV"] == "production":
         app.run(debug=False, host='0.0.0.0', port=5000)
     else:
-        app.run(debug=True, host='0.0.0.0', port=5000, ssl_context=('adhoc'))
+        app.run(debug=True, host='0.0.0.0', port=5000, ssl_context=('adhoc'))#
 

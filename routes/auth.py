@@ -37,9 +37,8 @@ REQ_URI = CLIENT.prepare_request_uri(
 
 
 from flask import jsonify
-from flask_limiter import Limiter
 
-def add_auth_routes(app, limiter):
+def add_auth_routes(app,):
     @app.route('/auth/callback', methods=['GET'])
     # @limiter.limit("5 per minute")
     def google_auth_callback():
@@ -81,7 +80,7 @@ def add_auth_routes(app, limiter):
 
 
     @app.route('/google_auth', methods=['GET'])
-    @limiter.limit("5 per minute")
+    # @limiter.limit("5 per minute")
     def google_auth():
         return jsonify({'redirect_url': REQ_URI}), 200
 
