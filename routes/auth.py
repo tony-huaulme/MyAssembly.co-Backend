@@ -34,14 +34,6 @@ REQ_URI = CLIENT.prepare_request_uri(
     prompt=DATA['prompt']
 )
 
-#GOOGLE-AUTH
-
-
-
-#EMAIL-PASSWORD-AUTH
-
-
-
 
 
 from flask import jsonify
@@ -49,7 +41,7 @@ from flask_limiter import Limiter
 
 def add_auth_routes(app, limiter):
     @app.route('/auth/callback', methods=['GET'])
-    @limiter.limit("5 per minute")
+    # @limiter.limit("5 per minute")
     def google_auth_callback():
         code = request.args.get('code')
         token_url, headers, body = CLIENT.prepare_token_request(
@@ -94,7 +86,7 @@ def add_auth_routes(app, limiter):
         return jsonify({'redirect_url': REQ_URI}), 200
 
     @app.route('/signup/emailpw', methods=['POST'])
-    @limiter.limit("5 per minute")
+    # @limiter.limit("5 per minute")
     def signup_emailpw():
         data = request.json
         email = data.get('email').lower()
@@ -119,7 +111,7 @@ def add_auth_routes(app, limiter):
 
 
     @app.route('/login/emailpw', methods=['POST'])
-    @limiter.limit("5 per minute")
+    # @limiter.limit("5 per minute")
     def login_emailpw():
         data = request.json
         email = data.get('email').lower()

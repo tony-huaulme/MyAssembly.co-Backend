@@ -12,7 +12,7 @@ app.config.from_object(Config)
 
 # Setup CORS with dynamic origins
 if app.config["ENV"] == "production":
-    CORS(app, origins=["https://www.myassembly.co", "https://myassembly.co"])
+    CORS(app, origins=["https://www.myassembly.co", "https://myassembly.co"], supports_credentials=True)
 else:
     CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
@@ -54,4 +54,8 @@ app.add_url_rule('/dbui', view_func=rendertables, methods=['GET'])
 
 # Run the application
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000, ssl_context=('adhoc'))
+    if app.config["ENV"] == "production":
+        app.run(debug=False, host='0.0.0.0', port=5000)
+    else:
+        app.run(debug=True, host='0.0.0.0', port=5000, ssl_context=('adhoc'))
+
