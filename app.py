@@ -20,7 +20,7 @@ else:
 @app.before_request
 def require_login():
     # Check if the route is not public
-    if not session.get('user_id') and request.endpoint not in ['auth_callback', 'google_auth', 'signup_emailpw', 'login_emailpw']:
+    if not session.get('user_id') and request.endpoint not in ['zzzz']: #'auth_callback', 'google_auth', 'signup_emailpw', 'login_emailpw'
         return jsonify({"error": "Not authorized, AuthREQUIERED"}), 401
 
 # Initialize extensions

@@ -75,7 +75,7 @@ def add_auth_routes(app,):
         # response.set_cookie('user_email', info['email'], domain=".myassembly.co", secure=True, httponly=False)
         # response.set_cookie('user_name', info['name'], domain=".myassembly.co", secure=True, httponly=False)
 
-        response = make_response(redirect(f"{'http://localhost:3000' if Config.ENV == 'development' else 'https://www.myassembly.co'}/authenticated?user_email={info['email']}&user_name={info['name']}&new_user={new_user}"))
+        response = make_response(redirect(f"{'http://localhost:3000' if Config.ENV == 'development' else 'https://www.myassembly.co'}/authenticated?user_email={info['email']}&user_name={info['name']}&new_user={True if new_user else False}"))
         return response
 
 
@@ -106,7 +106,7 @@ def add_auth_routes(app,):
         db.session.add(new_user)
         db.session.commit()
 
-        return jsonify({'message': 'User registered successfully', 'id': new_user.id, 'email': new_user.email}), 201
+        return jsonify({'message': 'User registered successfully', 'user': {'id': new_user.id, 'email': new_user.email}}), 201
 
 
     @app.route('/login/emailpw', methods=['POST'])
@@ -126,5 +126,5 @@ def add_auth_routes(app,):
         
 
         session['user_id'] = user.id
-        return jsonify({'message': 'Login successful', 'user': {'id': user.id, 'username': user.username, 'email': user.email}}), 200
+        return jsonify({'message': 'Login successful', 'user': {'id': user.id, 'email': user.email}}), 200
 
