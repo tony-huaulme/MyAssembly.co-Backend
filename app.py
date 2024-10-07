@@ -19,8 +19,7 @@ else:
 
 @app.before_request
 def require_login():
-    # Check if the route is not public
-    print("CHECKING IF ENDPOINT IS PUBLIC :",request.endpoint)
+
     if not session.get('user_id') and request.endpoint not in ['auth_callback', 'google_auth', 'signup_emailpw', 'login_emailpw', 'google_auth_callback']:
         return jsonify({"error": "Not authorized, AuthREQUIERED"}), 401
 
@@ -33,7 +32,7 @@ from routes.auth import add_auth_routes
 from routes.admin import rendertables
 from routes.project import add_project_routes
 from routes.user import add_user_routes
-
+from routes.file import add_files_routes
 
 # Add authentication routes
 add_auth_routes(app)
@@ -43,6 +42,9 @@ add_project_routes(app)
 
 # Add user routes
 add_user_routes(app)
+
+# Add file routes
+add_files_routes(app)
 
 # Add test routes
 app.add_url_rule('/dbui', view_func=rendertables, methods=['GET'])
