@@ -3,8 +3,18 @@ from models.models import db, Project, AppUser
 from flask import session
 
 def add_project_routes(app):
-    @app.route('/projects', methods=['POST'])
+    @app.route('/projects', methods=['POST', 'OPTIONS'])
     def create_project():
+
+        if request.method == 'OPTIONS':
+            # Handle preflight request for CORS
+            response = jsonify({'message': 'CORS Preflight'})
+            response.headers.add('Access-Control-Allow-Origin', 'https://www.myassembly.co')
+            response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
+            response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+            response.headers.add('Access-Control-Allow-Credentials', 'true')
+            return response, 200  # Return HTTP 200 OK status
+
         data = request.get_json()
         print("\n\n", data, "\n\n")  # Debugging line
         if not data:
