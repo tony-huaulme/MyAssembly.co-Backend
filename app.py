@@ -12,10 +12,10 @@ app.config.from_object(Config)
 
 # Setup CORS with dynamic origins
 if app.config["ENV"] == "production":
-    CORS(app)#, origins=["https://www.myassembly.co", "https://myassembly.co"], supports_credentials=True, allow_headers=["Content-Type", "Authorization"]
+    CORS(app, supports_credentials=True, origins=["https://www.myassembly.co"])#, origins=["https://www.myassembly.co", "https://myassembly.co"], supports_credentials=True, allow_headers=["Content-Type", "Authorization"]
 
 else:
-    CORS(app)#, origins=["http://localhost:3000"], supports_credentials=True, allow_headers=["Content-Type", "Authorization"]
+    CORS(app, supports_credentials=True, origins=["http://localhost:3000"])#, origins=["http://localhost:3000"], supports_credentials=True, allow_headers=["Content-Type", "Authorization"]
 
 
 @app.before_request
