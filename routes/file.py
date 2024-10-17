@@ -48,14 +48,15 @@ def add_files_routes(app):
 
             # Upload the file to the S3 bucket in the specific folder
             s3.upload_fileobj(file, Config.AWS_BUCKET_NAME, s3_key)
-
+            presigned_url = s3.generate_presigned_url('get_object', Params={'Bucket': Config.AWS_BUCKET_NAME, 'Key': s3_key}, ExpiresIn=60)
             # Construct the S3 URL for the uploaded file
             file_url = f"https://{Config.AWS_BUCKET_NAME}.s3.amazonaws.com/{s3_key}"
 
             # Return a success message with the file URL
             return jsonify({
                 "message": "File uploaded successfully",
-                "file_url": file_url
+                "file_url": file_url,
+                "presigned_url": presigned_url
             }), 201
 
         except NoCredentialsError:
