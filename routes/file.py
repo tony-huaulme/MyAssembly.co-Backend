@@ -57,4 +57,28 @@ def add_files_routes(app):
 
         except ClientError as e:
             return jsonify({"message": str(e)}), 500
-       
+        
+    @app.route('/files/download', methods=['GET'])
+    def download_file_from_s3():
+        # Get the file key from the query parameters
+        file_key = request.args.get('file_key')
+
+        if not file_key:
+            return jsonify({"message": "File key not provided"}), 400
+
+        try:
+            # Generate a presigned URL for the file
+            presigned_url = s3.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': Config.AWS_BUCKET_NAME, 'Key': file_key},
+                ExpiresIn=3600  # URL expires in 1 hour
+            )
+
+            # Redirect the user to the presigned URL for download
+            return jsonify({
+                "message": "Presigned URL generated successfully",
+                "presigned_url": presigned_url
+            }), 200
+
+        except ClientError as e:
+            return jsonify({"message": str(e)}), 500
