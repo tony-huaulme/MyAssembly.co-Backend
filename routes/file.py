@@ -10,7 +10,13 @@ s3 = boto3.client(
     aws_access_key_id=Config.AWS_ACCESS,
     aws_secret_access_key=Config.AWS_SECRET
 )
-
+s3 = boto3.client(
+        's3', 
+        region_name='eu-west-3',
+        endpoint_url='https://myassembly.co.s3.amazonaws.com',
+        aws_access_key_id=Config.AWS_ACCESS,
+        aws_secret_access_key=Config.AWS_SECRET
+    )
 
 def add_files_routes(app):
     @app.route('/files/upload', methods=['POST'])
@@ -71,7 +77,7 @@ def add_files_routes(app):
             presigned_url = s3.generate_presigned_url(
                 'get_object',
                 Params={'Bucket': Config.AWS_BUCKET_NAME, 'Key': file_key},
-                ExpiresIn=3600  # URL expires in 1 hour
+                ExpiresIn=60  # URL expires in 1 hour
             )
 
             # Redirect the user to the presigned URL for download
