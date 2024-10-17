@@ -1,21 +1,22 @@
 from flask import request, send_file, jsonify
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
+from botocore.config import Config as BotoConfig
 from config import Config
 from models.models import AppUser
 from flask import session
 
 s3 = boto3.client(
-    's3',
-    aws_access_key_id=Config.AWS_ACCESS,
-    aws_secret_access_key=Config.AWS_SECRET
-)
-s3 = boto3.client(
         's3', 
         region_name='eu-west-3',
         endpoint_url='https://myassembly.co.s3.amazonaws.com',
         aws_access_key_id=Config.AWS_ACCESS,
-        aws_secret_access_key=Config.AWS_SECRET
+        aws_secret_access_key=Config.AWS_SECRET,
+        config=BotoConfig(
+        s3={
+            'addressing_style': 'virtual'  # Use virtual-hosted-style URLs
+        }
+    )
     )
 
 def add_files_routes(app):
@@ -67,7 +68,7 @@ def add_files_routes(app):
     @app.route('/files/download', methods=['GET'])
     def download_file_from_s3():
         # Get the file key from the query parameters
-        file_key = request.args.get('file_key')
+        file_key = "MyAssemblyDemoLIL.glb"#request.args.get('file_key')
 
         if not file_key:
             return jsonify({"message": "File key not provided"}), 400
@@ -80,13 +81,12 @@ def add_files_routes(app):
                 ExpiresIn=60  # URL expires in 1 hour
             )
 
-            clreadURL = presigned_url.replace('myassembly.co.s3.amazonaws.com/myassembly.co/', 'myassembly.co.s3.amazonaws.com/', 1)
 
 
             # Redirect the user to the presigned URL for download
             return jsonify({
                 "message": "Presigned URL generated successfully",
-                "presigned_url": clreadURL
+                "presigned_url": presigned_url
             }), 200
 
         except ClientError as e:
