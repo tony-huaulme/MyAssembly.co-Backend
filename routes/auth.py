@@ -60,6 +60,8 @@ def add_auth_routes(app,):
         response_user_info = requests.get(uri, headers=headers, data=body)
         info = response_user_info.json()
 
+        #extract what can give me the profile pic of the google account
+        print(info)
         # Check if user already exists
         user = AppUser.query.filter_by(email=info['email']).first()
         new_user = False
@@ -75,7 +77,7 @@ def add_auth_routes(app,):
         # response.set_cookie('user_email', info['email'], domain=".myassembly.co", secure=True, httponly=False)
         # response.set_cookie('user_name', info['name'], domain=".myassembly.co", secure=True, httponly=False)
 
-        response = make_response(redirect(f"{'http://localhost:3000' if Config.ENV == 'development' else 'https://www.myassembly.co'}/authenticated?user_email={info['email']}&user_name={info['name']}&new_user={True if new_user else False}"))
+        response = make_response(redirect(f"{'http://localhost:3000' if Config.ENV == 'development' else 'https://www.myassembly.co'}/authenticated?user_email={info['email']}&user_name={info['name']}&new_user={True if new_user else False}&picture={info['picture']}"))
         return response
 
 

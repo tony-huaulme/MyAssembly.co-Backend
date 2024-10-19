@@ -1,14 +1,17 @@
-from flask import request, send_file, jsonify
+from flask import request, send_file, jsonify, redirect
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 from config import Config
+from botocore.config import Config as BotoConfig
 from models.models import AppUser
 from flask import session
 
 s3 = boto3.client(
     's3',
     aws_access_key_id=Config.AWS_ACCESS,
-    aws_secret_access_key=Config.AWS_SECRET
+    aws_secret_access_key=Config.AWS_SECRET,
+    region_name="eu-west-3",  # Assuming Frankfurt (change this to your correct region)
+    config=BotoConfig(s3={'addressing_style': 'virtual'})  # Enforce virtual-hosted style
 )
 
 
@@ -57,4 +60,34 @@ def add_files_routes(app):
 
         except ClientError as e:
             return jsonify({"message": str(e)}), 500
-       
+
+    @app.route('/files/download', methods=['GET'])
+    def download_file_from_s3():
+        # Get the file key from the query parameters
+        file_key = request.args.get('file_key')
+
+        if not file_key:
+            return jsonify({"message": "No file key provided"}), 400
+
+        try:
+            # Generate a temporary URL for the file
+            url = s3.generate_presigned_url(
+                    'get_object',
+                    Params={
+                        'Bucket': Config.AWS_BUCKET_NAME,  # Just the bucket name here
+                        'Key': file_key  # The file key (with any folder structure)
+                    },
+                    ExpiresIn=3600  # URL expires in 1 hour
+                )
+
+            print("GENERATED URL :",url)
+            print("USED KEY :",file_key)
+            # Redirect the user to the temporary URL for download
+            return jsonify({"presigned_url": url}), 200
+            # return redirect(url)
+
+        except NoCredentialsError:
+            return jsonify({"message": "Credentials not available"}), 403
+
+        except ClientError as e:
+            return jsonify({"message": str(e)}), 500
