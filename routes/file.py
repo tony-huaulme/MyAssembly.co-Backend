@@ -12,11 +12,6 @@ s3 = boto3.client(
         endpoint_url='https://myassembly.co.s3.amazonaws.com',
         aws_access_key_id=Config.AWS_ACCESS,
         aws_secret_access_key=Config.AWS_SECRET,
-        config=BotoConfig(
-        s3={
-            'addressing_style': 'virtual'  # Use virtual-hosted-style URLs
-        }
-    )
     )
 
 def add_files_routes(app):
