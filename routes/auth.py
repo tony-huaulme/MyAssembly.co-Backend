@@ -128,3 +128,9 @@ def add_auth_routes(app,):
         session['user_id'] = user.id
         return jsonify({'message': 'Login successful', 'user': {'id': user.id, 'email': user.email}}), 200
 
+    @app.route('/logout')
+    def logout():
+        # Clear the session data to log out the user
+        session.clear()
+        # just return 200
+        return jsonify({'message': 'Logged out successfully'}), 200

@@ -15,13 +15,13 @@ if app.config["ENV"] == "production":
     CORS(app, supports_credentials=True, origins=["https://www.myassembly.co", "https://myassembly.co"])#, origins=["https://www.myassembly.co", "https://myassembly.co"], supports_credentials=True, allow_headers=["Content-Type", "Authorization"]
 
 else:
-    CORS(app, supports_credentials=True, origins=["http://localhost:3000"])#, origins=["http://localhost:3000"], supports_credentials=True, allow_headers=["Content-Type", "Authorization"]
+    CORS(app, supports_credentials=True, origins=["http://localhost:3000"], allow_headers=["Content-Type", "Authorization"])#, origins=["http://localhost:3000"], supports_credentials=True, allow_headers=["Content-Type", "Authorization"]
 
 
 @app.before_request
 def require_login():
 
-    if not session.get('user_id') and request.endpoint not in ['auth_callback', 'google_auth', 'signup_emailpw', 'login_emailpw', 'google_auth_callback']:
+    if app.config["ENV"] == "production" and not session.get('user_id') and request.endpoint not in ['auth_callback', 'google_auth', 'signup_emailpw', 'login_emailpw', 'google_auth_callback']:
         return jsonify({"error": "Not authorized, AuthREQUIERED"}), 401
 
 # Initialize extensions
