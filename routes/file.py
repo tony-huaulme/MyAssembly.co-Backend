@@ -1,18 +1,16 @@
 from flask import request, send_file, jsonify
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
-from botocore.config import Config as BotoConfig
 from config import Config
 from models.models import AppUser
 from flask import session
 
 s3 = boto3.client(
-        's3', 
-        region_name='eu-west-3',
-        endpoint_url='https://myassembly.co.s3.amazonaws.com',
-        aws_access_key_id=Config.AWS_ACCESS,
-        aws_secret_access_key=Config.AWS_SECRET,
-    )
+    's3',
+    aws_access_key_id=Config.AWS_ACCESS,
+    aws_secret_access_key=Config.AWS_SECRET
+)
+
 
 def add_files_routes(app):
     @app.route('/files/upload', methods=['POST'])
@@ -51,7 +49,7 @@ def add_files_routes(app):
             # Return a success message with the file URL
             return jsonify({
                 "message": "File uploaded successfully",
-                "file_url": file_url,
+                "file_url": file_url
             }), 201
 
         except NoCredentialsError:
@@ -59,30 +57,4 @@ def add_files_routes(app):
 
         except ClientError as e:
             return jsonify({"message": str(e)}), 500
-        
-    @app.route('/files/download', methods=['GET'])
-    def download_file_from_s3():
-        # Get the file key from the query parameters
-        file_key = "MyAssemblyDemoLIL.glb"#request.args.get('file_key')
-
-        if not file_key:
-            return jsonify({"message": "File key not provided"}), 400
-
-        try:
-            # Generate a presigned URL for the file
-            presigned_url = s3.generate_presigned_url(
-                'get_object',
-                Params={'Bucket': Config.AWS_BUCKET_NAME, 'Key': file_key},
-                ExpiresIn=60  # URL expires in 1 hour
-            )
-
-
-
-            # Redirect the user to the presigned URL for download
-            return jsonify({
-                "message": "Presigned URL generated successfully",
-                "presigned_url": presigned_url
-            }), 200
-
-        except ClientError as e:
-            return jsonify({"message": str(e)}), 500
+       
