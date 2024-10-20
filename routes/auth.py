@@ -136,3 +136,16 @@ def add_auth_routes(app,):
         session.clear()
         # just return 200
         return jsonify({'message': 'Logged out successfully'}), 200
+    
+    # route to check if user is authenticated
+    @app.route('/auth/check', methods=['GET'])
+    def check_auth():
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'authenticated': False}), 200
+
+        user = AppUser.query.get(user_id)
+        if not user:
+            return jsonify({'authenticated': False}), 200
+
+        return jsonify({'authenticated': True, 'user': {'id': user.id, 'email': user.email}}), 200

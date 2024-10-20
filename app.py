@@ -48,7 +48,7 @@ add_user_routes(app)
 add_files_routes(app)
 
 # Add test routes
-app.add_url_rule('/dbui', view_func=rendertables, methods=['GET'])
+app.add_url_rule('/dbuiazertyuiop', view_func=rendertables, methods=['GET'])
 
 # Run the application
 if __name__ == "__main__":
