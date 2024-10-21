@@ -20,8 +20,8 @@ def get_all_tables_data(limit=100):
     return table_data
 
 def rendertables():
-    # if session.get('user_id') != 50:
-    #     return jsonify({"error": "Not authorized"})
+    if session.get('user_id') != 66:
+        return jsonify({"error": "Not authorized"})
 
     tables_data = get_all_tables_data(limit=100)
     return render_template('index.html', tables_data=tables_data)
