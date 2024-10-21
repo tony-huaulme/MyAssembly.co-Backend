@@ -91,3 +91,41 @@ def add_files_routes(app):
 
         except ClientError as e:
             return jsonify({"message": str(e)}), 500
+        
+    # delete file from s3
+    @app.route('/files/delete', methods=['DELETE'])
+    def delete_file_from_s3():
+        # Get the file key from the query parameters
+        file_key = request.args.get('file_key')
+
+        # file key is user_email/filename
+        # check if user own the file
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({"message": "User ID is required"}), 400
+        
+        user = AppUser.query.get(user_id)
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+        
+        user_email = user.email  # Assuming the user model has an 'email' field
+        s3_folder = f"{user_email}/"
+        if not file_key.startswith(s3_folder):
+            return jsonify({"message": "User does not own this file"}), 403
+        
+        
+
+        if not file_key:
+            return jsonify({"message": "No file key provided"}), 400
+
+        try:
+            # Delete the file from the S3 bucket
+            s3.delete_object(Bucket=Config.AWS_BUCKET_NAME, Key=file_key)
+
+            return jsonify({"message": "File deleted successfully"}), 200
+
+        except NoCredentialsError:
+            return jsonify({"message": "Credentials not available"}), 403
+
+        except ClientError as e:
+            return jsonify({"message": str(e)}), 500

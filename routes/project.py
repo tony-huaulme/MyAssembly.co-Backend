@@ -75,3 +75,25 @@ def add_project_routes(app):
             return jsonify({"message": "Project not found"}), 404
 
         return jsonify(project.to_dict()), 200
+
+    # delete project and it's files
+    @app.route('/projects/<int:project_id>', methods=['DELETE'])
+    def delete_project(project_id):
+        # Query the database for the project with the given project_id
+        project = Project.query.filter_by(id=project_id).first()
+        if not project:
+            return jsonify({"message": "Project not found"}), 404
+
+        # check if user own the project
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({"message": "User ID is required"}), 400
+        
+        if project.user_id != user_id:
+            return jsonify({"message": "User does not own this project"}), 403
+        
+
+        db.session.delete(project)
+        db.session.commit()
+
+        return jsonify({"message": "Project deleted successfully"}), 200
