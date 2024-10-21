@@ -21,7 +21,7 @@ else:
 @app.before_request
 def require_login():
 
-    if app.config["ENV"] == "production" and not session.get('user_id') and request.endpoint not in ['auth_callback', 'google_auth', 'signup_emailpw', 'login_emailpw', 'google_auth_callback']:
+    if app.config["ENV"] == "production" and not session.get('user_id') and request.endpoint not in ['auth_callback', 'google_auth', 'signup_emailpw', 'login_emailpw', 'google_auth_callback', "auth_check"]:
         return jsonify({"error": "Not authorized, AuthREQUIERED"}), 401
 
 # Initialize extensions
