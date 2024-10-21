@@ -77,7 +77,7 @@ def add_project_routes(app):
         return jsonify(project.to_dict()), 200
 
     # delete project and it's files
-    @app.route('/projects/<int:project_id>', methods=['DELETE'])
+    @app.route('/projects_delete/<int:project_id>', methods=['GET'])
     def delete_project(project_id):
         # Query the database for the project with the given project_id
         project = Project.query.filter_by(id=project_id).first()
