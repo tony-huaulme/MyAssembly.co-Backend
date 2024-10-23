@@ -97,3 +97,16 @@ def add_project_routes(app):
         db.session.commit()
 
         return jsonify({"message": "Project deleted successfully"}), 200
+    
+    # route to get all projects
+    @app.route('/projects_all', methods=['GET'])
+    def get_all_projects():
+
+        sender_user_id = session.get('user_id')
+
+        if sender_user_id != 66:
+            return jsonify({"message": "Not authorized"}), 401
+
+        projects = Project.query.all()
+        projects_list = [project.to_dict() for project in projects]
+        return jsonify({'projects': projects_list}), 200
