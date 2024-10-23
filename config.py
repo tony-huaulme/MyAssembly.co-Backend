@@ -1,5 +1,5 @@
 import os
-
+from datetime import timedelta
 # Try to import and load dotenv only if available
 try:
     from dotenv import load_dotenv
@@ -31,3 +31,6 @@ class Config:
 
     # CORS config
     ENV = os.getenv('ENV')
+
+    # Session config
+    PERMANENT_SESSION_LIFETIME = timedelta(days=7)

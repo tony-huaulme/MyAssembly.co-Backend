@@ -72,7 +72,7 @@ def add_auth_routes(app,):
 
         #set user id in session
         session['user_id'] = new_user.id if not user else user.id
-
+        session.permanent = True
         # response = make_response(redirect(f"{'http://localhost:3000' if Config.ENV == 'development' else 'https://www.myassembly.co'}/authenticated"))
         # response.set_cookie('user_email', info['email'], domain=".myassembly.co", secure=True, httponly=False)
         # response.set_cookie('user_name', info['name'], domain=".myassembly.co", secure=True, httponly=False)
@@ -128,6 +128,7 @@ def add_auth_routes(app,):
         
 
         session['user_id'] = user.id
+        session.permanent = True
         return jsonify({'message': 'Login successful', 'user': {'id': user.id, 'email': user.email}}), 200
 
     @app.route('/logout')
