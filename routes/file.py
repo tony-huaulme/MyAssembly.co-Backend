@@ -80,10 +80,13 @@ def add_files_routes(app):
                     ExpiresIn=3600  # URL expires in 1 hour
                 )
 
-            print("GENERATED URL :",url)
-            print("USED KEY :",file_key)
+            # print("GENERATED URL :",url)
+            # print("USED KEY :",file_key)
+
+            url_to_send = url if Config.ENV == "production" else "https://www.myassembly.co/src/assets/models/DemoModel.glb"
+
             # Redirect the user to the temporary URL for download
-            return jsonify({"presigned_url": url}), 200
+            return jsonify({"presigned_url": url_to_send}), 200
             # return redirect(url)
 
         except NoCredentialsError:

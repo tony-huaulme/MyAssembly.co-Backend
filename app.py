@@ -21,9 +21,14 @@ else:
 @app.before_request
 def require_login():
 
-    if app.config["ENV"] == "production" and not session.get('user_id') and request.endpoint not in ['auth_callback', 'google_auth', 'signup_emailpw', 'login_emailpw', 'google_auth_callback', "auth_check"]:
+    allowed_routes = [
+        'auth_callback', 'google_auth', 'signup_emailpw', 
+        'login_emailpw', 'google_auth_callback', "auth_check"
+    ]
+    if  not session.get('user_id'):
+        if request.endpoint in allowed_routes or request.path.startswith('/projects/') or request.path.startswith('/files/'):
+            return None  # Skip auth check
         return jsonify({"error": "Not authorized, AuthREQUIERED"}), 401
-
 # Initialize extensions
 db.init_app(app)
 migrate = Migrate(app, db)

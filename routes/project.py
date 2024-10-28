@@ -110,3 +110,31 @@ def add_project_routes(app):
         projects = Project.query.all()
         projects_list = [project.to_dict() for project in projects]
         return jsonify({'projects': projects_list}), 200
+    
+    # route to update project
+    @app.route('/projects/<int:project_id>', methods=['PUT'])
+    def update_project(project_id):
+        # Query the database for the project with the given project_id
+        project = Project.query.filter_by(id=project_id).first()
+
+        if not project:
+            return jsonify({"message": "Project not found"}), 404
+
+        # Check if user owns the project
+        # user_id = session.get('user_id')
+        # if not user_id:
+        #     return jsonify({"message": "User ID is required"}), 400
+        
+        # if project.user_id != user_id:
+        #     return jsonify({"message": "User does not own this project"}), 403
+
+        # Access form data
+        settings = request.json.get('settings')  # Assuming settings is part of the JSON payload
+
+        # Assuming project has a settings attribute to store the settings JSON
+        if settings is not None:
+            project.settings = settings  # Update settings attribute if it exists
+
+        db.session.commit()
+
+        return jsonify(project.to_dict()), 200
