@@ -109,8 +109,12 @@ def add_auth_routes(app,):
         db.session.add(new_user)
         db.session.commit()
 
-        return jsonify({'message': 'User registered successfully', 'user': {'id': new_user.id, 'email': new_user.email}}), 201
+        session['user_id'] = new_user.id if not user else user.id
+        session.permanent = True
 
+        response = make_response(redirect(f"{'http://localhost:3000' if Config.ENV == 'development' else 'https://www.myassembly.co'}/dashboard/projects"))
+
+        return response
 
     @app.route('/login/emailpw', methods=['POST'])
     # @limiter.limit("5 per minute")
