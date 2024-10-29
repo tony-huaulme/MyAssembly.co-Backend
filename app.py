@@ -26,7 +26,7 @@ def require_login():
         'login_emailpw', 'google_auth_callback', "auth_check"
     ]
     if not session.get('user_id'):
-        if not (request.endpoint in allowed_routes) or not request.path.startswith('/projects/') or not request.path.startswith('/files/'):
+        if not (request.endpoint in allowed_routes) and not request.path.startswith('/projects/') and not request.path.startswith('/files/'):
         
             return jsonify({"error": "Not authorized, AuthREQUIERED"}), 401
 # Initialize extensions
