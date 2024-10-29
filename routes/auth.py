@@ -134,7 +134,8 @@ def add_auth_routes(app,):
 
         session['user_id'] = user.id
         session.permanent = True
-        return jsonify({'message': 'Login successful', 'user': {'id': user.id, 'email': user.email}}), 200
+        response = make_response(redirect(f"{'http://localhost:3000' if Config.ENV == 'development' else 'https://www.myassembly.co'}/dashboard/projects"))
+        return response
 
     @app.route('/logout')
     def logout():
