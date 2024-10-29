@@ -25,10 +25,12 @@ def require_login():
         'auth_callback', 'google_auth', 'signup_emailpw', 
         'login_emailpw', 'google_auth_callback', "auth_check"
     ]
+
     if not session.get('user_id'):
-        if not (request.endpoint in allowed_routes) and not request.path.startswith('/projects/') and not request.path.startswith('/files/'):
-        
-            return jsonify({"error": "Not authorized, AuthREQUIERED"}), 401
+        if not request.endpoint in allowed_routes:
+            if not request.path.startswith('/projects/'):
+                if not request.path.startswith('/files/'):
+                    return jsonify({"error": "Not authorized, AuthREQUIERED"}), 401
 # Initialize extensions
 db.init_app(app)
 migrate = Migrate(app, db)
