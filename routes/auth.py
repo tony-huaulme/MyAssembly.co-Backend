@@ -77,7 +77,7 @@ def add_auth_routes(app,):
         # response.set_cookie('user_email', info['email'], domain=".myassembly.co", secure=True, httponly=False)
         # response.set_cookie('user_name', info['name'], domain=".myassembly.co", secure=True, httponly=False)
 
-        response = make_response(redirect(f"{'http://localhost:3000' if Config.ENV == 'development' else 'https://www.myassembly.co'}/dashboard/projects"))
+        response = make_response(redirect(f"{'http://localhost:3000' if Config.ENV == 'development' else 'https://www.myassembly.co'}/authenticated?user_email={info['email']}&user_name={info['name']}&new_user={True if new_user else False}&picture={info['picture']}"))
         #?user_email={info['email']}&user_name={info['name']}&new_user={True if new_user else False}&picture={info['picture']}
         return response
 
