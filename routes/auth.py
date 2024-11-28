@@ -145,6 +145,8 @@ def add_auth_routes(app,):
     # route to check if user is authenticated
     @app.route('/auth/check', methods=['GET'])
     def check_auth():
+        # return jsonify({'authenticated': True, 'user': {'id': 66, 'email': "BOSS"}}), 200
+
         user_id = session.get('user_id')
         if not user_id:
             return jsonify({'authenticated': False}), 200

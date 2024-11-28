@@ -25,7 +25,6 @@ def require_login():
         'auth_callback', 'google_auth', 'signup_emailpw', 
         'login_emailpw', 'google_auth_callback', "auth_check"
     ]
-
     if not session.get('user_id'):
         if not request.endpoint in allowed_routes:
             if not request.path.startswith('/projects/'):
