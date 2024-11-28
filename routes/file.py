@@ -113,9 +113,23 @@ def add_files_routes(app):
             print(f"Output path: {output_path}")
 
             print("Starting IFC to GLB conversion.")
+
+            # Dynamically locate IfcConvert in the current directory or subdirectories
+            current_dir = os.getcwd()  # Get the current working directory
+            print(f"Current directory: {current_dir}")
+            ifcconvert_path = os.path.join(current_dir, 'IfcConvert')
+            print(f"Constructed path: {ifcconvert_path}")
+            # Check if the executable exists at the constructed path
+            if os.path.exists(ifcconvert_path):
+                print(f"IfcConvert found at: {ifcconvert_path}")
+            else:
+                print("IfcConvert not found in current directory. Searching subdirectories.")
+                raise FileNotFoundError(f"IfcConvert executable not found in {ifcconvert_path}")
+
+            # Use the resolved path in the subprocess call
             subprocess.run(
                 [
-                    'IfcConvert',
+                    ifcconvert_path,  # Use the full resolved path
                     input_path,
                     output_path
                 ],
