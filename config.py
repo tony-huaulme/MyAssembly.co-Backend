@@ -21,6 +21,9 @@ class Config:
     AWS_ACCESS = os.getenv('AWS_ACCESS')
     AWS_SECRET = os.getenv('AWS_SECRET')
 
+    #Local file conversion config
+    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
+    CONVERTED_FOLDER = os.getenv('CONVERTED_FOLDER')
 
     # OAuth config
     OAUTHLIB_RELAX_TOKEN_SCOPE = True
