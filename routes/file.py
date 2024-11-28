@@ -115,7 +115,7 @@ def add_files_routes(app):
             print("Starting IFC to GLB conversion.")
             subprocess.run(
                 [
-                    '.\IfcConvert',
+                    'IfcConvert',
                     input_path,
                     output_path
                 ],
