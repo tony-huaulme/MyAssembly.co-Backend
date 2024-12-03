@@ -17,7 +17,7 @@ def add_project_routes(app):
         # Access form data instead of JSON
         project_name = request.form.get('project_name')
         file3d_link = request.form.get('file3d_link')
-
+        project_settings = request.form.get('settings')
         if not project_name or not file3d_link:
             return jsonify({"message": "Project name and file3d link are required"}), 400
 
@@ -34,7 +34,8 @@ def add_project_routes(app):
             new_project = Project(
                 user_id=user_id,
                 project_name=project_name,
-                file3d_link=file3d_link
+                file3d_link=file3d_link,
+                settings=project_settings,
             )
             db.session.add(new_project)
             db.session.commit()
