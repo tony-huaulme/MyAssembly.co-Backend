@@ -1,6 +1,9 @@
 from flask import request, jsonify
 from models.models import db, Project, AppUser
 from flask import session
+from config import Config
+import json
+
 
 def add_project_routes(app):
     @app.route('/projects', methods=['POST', 'OPTIONS'])
@@ -30,12 +33,25 @@ def add_project_routes(app):
         if not user:
             return jsonify({"message": f"User with ID {user_id} does not exist."}), 400
 
+        settings = Config.DEFAULT_PROJECT_SETTINGS
+
+        if project_settings:
+            settings["pannels"] =  project_settings
+            try:
+                project_settings = json.loads(project_settings)
+            except json.JSONDecodeError:
+                return jsonify({"message": "Invalid JSON for project settings"}), 400
+
+            settings["pannels"] = project_settings
+
+        settings = json.dumps(settings)
+
         try:
             new_project = Project(
                 user_id=user_id,
                 project_name=project_name,
                 file3d_link=file3d_link,
-                settings=project_settings,
+                settings=settings,
             )
             db.session.add(new_project)
             db.session.commit()
@@ -48,6 +64,7 @@ def add_project_routes(app):
             "user_id": new_project.user_id,
             "project_name": new_project.project_name,
             "file3d_link": new_project.file3d_link,
+            "settings": new_project.settings,
             "created_at": new_project.created_at.isoformat(),
             "updated_at": new_project.updated_at.isoformat()
         }), 201

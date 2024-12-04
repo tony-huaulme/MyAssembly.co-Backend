@@ -37,3 +37,10 @@ class Config:
 
     # Session config
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
+
+    #Default Project Settings
+    DEFAULT_PROJECT_SETTINGS = {
+        "description": "No description",
+        "pannels": {},
+    }
+    
