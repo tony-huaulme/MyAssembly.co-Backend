@@ -91,7 +91,7 @@ def add_files_routes(app):
             # print("GENERATED URL :",url)
             # print("USED KEY :",file_key)
 
-            url_to_send = url if Config.ENV == "production" else "https://www.myassembly.co/src/assets/models/DemoModel.glb"
+            url_to_send = url if Config.ENV == "production" else "https://www.myassembly.co/src/assets/models/ConvertedANDsettings.glb"
 
             # Redirect the user to the temporary URL for download
             return jsonify({"presigned_url": url_to_send}), 200
@@ -200,12 +200,16 @@ def add_files_routes(app):
                 print("IfcConvert not found in current directory. Searching subdirectories.")
                 raise FileNotFoundError(f"IfcConvert executable not found in {ifcconvert_path}")
 
+            
+            args = ["--use-element-guids", "-j", "100"]
+
             # Use the resolved path in the subprocess call
             subprocess.run(
                 [
                     ifcconvert_path,  # Use the full resolved path
                     input_path,
-                    output_path
+                    output_path,
+                    *args,
                 ],
                 capture_output=True, text=True, check=True, timeout=120
             )
