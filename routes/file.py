@@ -169,12 +169,6 @@ def add_files_routes(app):
 
             # Save the uploaded file on amazon s3, in the directory IFCs
             filename = secure_filename(file.filename)
-            # make sure the file name is unique adding timestampnumbers
-            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-            unique_filename = f"{user_email}_{filename}_{timestamp}"
-            s3_folder = "IFCs/"
-            s3_key = f"{s3_folder}{unique_filename}"
-            s3.upload_fileobj(file, Config.AWS_BUCKET_NAME, s3_key)
 
 
             # print("Constructing input path.")
@@ -183,6 +177,17 @@ def add_files_routes(app):
 
             # print("Saving file locally.")
             file.save(input_path)
+
+
+            with open(input_path, 'rb') as ifc_file:
+                # make sure the file name is unique adding timestampnumbers
+                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                unique_filename = f"{user_email}_{filename}_{timestamp}"
+                s3_folder = "IFCs/"
+                s3_key = f"{s3_folder}{unique_filename}"
+                s3.upload_fileobj(ifc_file, Config.AWS_BUCKET_NAME, s3_key)
+
+
             # print(f"File saved at {input_path}")
 
             # Convert the file to GLB
