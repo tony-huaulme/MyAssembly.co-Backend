@@ -20,7 +20,9 @@ def add_project_routes(app):
         # Access form data instead of JSON
         project_name = request.form.get('project_name')
         file3d_link = request.form.get('file3d_link')
-        project_settings = request.form.get('settings')
+        panel_structure = request.form.get('panel_structure')
+        model_structure_identification = request.form.get('model_structure_identification')
+
         if not project_name or not file3d_link:
             return jsonify({"message": "Project name and file3d link are required"}), 400
 
@@ -35,14 +37,8 @@ def add_project_routes(app):
 
         settings = Config.DEFAULT_PROJECT_SETTINGS
 
-        if project_settings:
-            settings["pannels"] =  project_settings
-            try:
-                project_settings = json.loads(project_settings)
-            except json.JSONDecodeError:
-                return jsonify({"message": "Invalid JSON for project settings"}), 400
-
-            settings["pannels"] = project_settings
+        settings["panel_structure"] = panel_structure
+        settings["model_structure_identification"] = model_structure_identification
 
         settings = json.dumps(settings)
 
@@ -139,12 +135,12 @@ def add_project_routes(app):
             return jsonify({"message": "Project not found"}), 404
 
         # Check if user owns the project
-        # user_id = session.get('user_id')
-        # if not user_id:
-        #     return jsonify({"message": "User ID is required"}), 400
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({"message": "User ID is required"}), 400
         
-        # if project.user_id != user_id:
-        #     return jsonify({"message": "User does not own this project"}), 403
+        if project.user_id != user_id:
+            return jsonify({"message": "User does not own this project"}), 403
 
         # Access form data
         settings = request.json.get('settings')  # Assuming settings is part of the JSON payload

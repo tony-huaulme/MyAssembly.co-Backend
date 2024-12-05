@@ -5,7 +5,7 @@ from config import Config
 from botocore.config import Config as BotoConfig
 from models.models import AppUser
 from flask import session
-
+from datetime import datetime
 
 #conversion imports
 import os
@@ -13,6 +13,7 @@ import subprocess
 import ifcopenshell
 from werkzeug.utils import secure_filename
 from collections import defaultdict
+from time import time
 
 s3 = boto3.client(
     's3',
@@ -91,7 +92,7 @@ def add_files_routes(app):
             # print("GENERATED URL :",url)
             # print("USED KEY :",file_key)
 
-            url_to_send = url if Config.ENV == "production" else "https://www.myassembly.co/src/assets/models/ConvertedANDsettings.glb"
+            url_to_send = url if Config.ENV == "production" else "https://www.myassembly.co/src/assets/models/guuidGlbFromIFC.glb"
 
             # Redirect the user to the temporary URL for download
             return jsonify({"presigned_url": url_to_send}), 200
@@ -144,6 +145,7 @@ def add_files_routes(app):
     @app.route('/files/convert_getsettings_upload', methods=['POST'])
     def upload_and_convert_file_to_s3():
         file = request.files.get('file')
+        start_time = time()
 
         if not file:
             return jsonify({"message": "No file provided"}), 400
@@ -164,41 +166,47 @@ def add_files_routes(app):
             return jsonify({"message": "Only IFC files are allowed"}), 400
 
         try:
-            # Save the uploaded file locally
-            print("Securing filename.")
+
+            # Save the uploaded file on amazon s3, in the directory IFCs
             filename = secure_filename(file.filename)
-            print(f"Filename secured: {filename}")
+            # make sure the file name is unique adding timestampnumbers
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            unique_filename = f"{user_email}_{filename}_{timestamp}"
+            s3_folder = "IFCs/"
+            s3_key = f"{s3_folder}{unique_filename}"
+            s3.upload_fileobj(file, Config.AWS_BUCKET_NAME, s3_key)
 
-            print("Constructing input path.")
+
+            # print("Constructing input path.")
             input_path = f'./{filename}'#os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            print(f"Input path constructed: {input_path}")
+            # print(f"Input path constructed: {input_path}")
 
-            print("Saving file locally.")
+            # print("Saving file locally.")
             file.save(input_path)
-            print(f"File saved at {input_path}")
+            # print(f"File saved at {input_path}")
 
             # Convert the file to GLB
-            print("Generating output filename.")
+            # print("Generating output filename.")
             output_filename = f"{os.path.splitext(filename)[0]}.glb"
-            print(f"Output filename: {output_filename}")
+            # print(f"Output filename: {output_filename}")
 
-            print("Constructing output path.")
+            # print("Constructing output path.")
             output_path = f'./{output_filename}'#os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
-            print(f"Output path: {output_path}")
+            # print(f"Output path: {output_path}")
 
-            print("Starting IFC to GLB conversion.")
+            # print("Starting IFC to GLB conversion.")
 
             # Dynamically locate IfcConvert in the current directory or subdirectories
             current_dir = os.getcwd()  # Get the current working directory
-            print(f"Current directory: {current_dir}")
+            # print(f"Current directory: {current_dir}")
             ifcconvert_path = os.path.join(current_dir, 'IfcConvert')
-            print(f"Constructed path: {ifcconvert_path}")
+            # print(f"Constructed path: {ifcconvert_path}")
             # Check if the executable exists at the constructed path
-            if os.path.exists(ifcconvert_path):
-                print(f"IfcConvert found at: {ifcconvert_path}")
-            else:
-                print("IfcConvert not found in current directory. Searching subdirectories.")
-                raise FileNotFoundError(f"IfcConvert executable not found in {ifcconvert_path}")
+            # if os.path.exists(ifcconvert_path):
+                # print(f"IfcConvert found at: {ifcconvert_path}")
+            # else:
+                # print("IfcConvert not found in current directory. Searching subdirectories.")
+                # raise FileNotFoundError(f"IfcConvert executable not found in {ifcconvert_path}")
 
             
             args = ["--use-element-guids", "-j", "100"]
@@ -213,51 +221,58 @@ def add_files_routes(app):
                 ],
                 capture_output=True, text=True, check=True, timeout=120
             )
-            print("Conversion completed successfully.")
+            # print("Conversion completed successfully.")
 
             # Extract GUIDs and Descriptions
-            print("Opening IFC file for extraction.")
+            # print("Opening IFC file for extraction.")
             ifc_file = ifcopenshell.open(input_path)
-            print("IFC file opened.")
+            # print("IFC file opened.")
 
             description_dict = defaultdict(list)
-            print("Extracting elements.")
+            # print("Extracting elements.")
             for element in ifc_file.by_type('IfcElement'):
-                print(f"Processing element: {element}")
+                # print(f"Processing element: {element}")
                 guid = element.GlobalId
                 description = getattr(element, 'Description', None)
                 if description:
-                    print(f"Adding GUID {guid} to description '{description}'.")
+                    # print(f"Adding GUID {guid} to description '{description}'.")
                     description_dict[description].append(guid)
 
             # Upload the GLB file to S3
-            print("Uploading GLB file to S3.")
+            # print("Uploading GLB file to S3.")
             with open(output_path, 'rb') as glb_file:
                 s3_folder = f"{user_email}/"  # Folder structure with user's email
-                print(f"S3 folder: {s3_folder}")
+                # print(f"S3 folder: {s3_folder}")
                 s3_key = f"{s3_folder}{output_filename}"
-                print(f"S3 key: {s3_key}")
+                # print(f"S3 key: {s3_key}")
                 s3.upload_fileobj(glb_file, Config.AWS_BUCKET_NAME, s3_key)
-                print(f"File uploaded to S3 with key: {s3_key}")
+                # print(f"File uploaded to S3 with key: {s3_key}")
 
             # Construct the S3 URL for the uploaded GLB file
-            print("Constructing S3 URL.")
+            # print("Constructing S3 URL.")
             file_url = f"https://{Config.AWS_BUCKET_NAME}.s3.amazonaws.com/{s3_key}"
-            print(f"S3 URL: {file_url}")
+            # print(f"S3 URL: {file_url}")
 
             # Clean up local files (optional)
-            print("Removing local files.")
+            # print("Removing local files.")
             os.remove(input_path)
-            print(f"Removed file: {input_path}")
+            # print(f"Removed file: {input_path}")
             os.remove(output_path)
-            print(f"Removed file: {output_path}")
+            # print(f"Removed file: {output_path}")
 
             # Return a success message with the file URL and extracted data
-            print("Returning success response.")
+            # print("Returning success response.")
+
+            # Your existing code here
+
+            end_time = time()
+            time_spent = round(end_time - start_time, 2)
+
             return jsonify({
                 "message": "File converted, uploaded, and data extracted successfully",
                 "file_url": file_url,
-                "model_structure": description_dict
+                "model_structure": description_dict,
+                "time_spent": time_spent
             }), 201
 
         except subprocess.CalledProcessError as e:
