@@ -214,7 +214,7 @@ def add_files_routes(app):
                 # raise FileNotFoundError(f"IfcConvert executable not found in {ifcconvert_path}")
 
             
-            args = ["--use-element-guids", "-j", "100"]
+            args = ["--use-element-guids"]
 
             # Use the resolved path in the subprocess call
             subprocess.run(

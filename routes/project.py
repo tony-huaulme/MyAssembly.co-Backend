@@ -20,7 +20,7 @@ def add_project_routes(app):
         # Access form data instead of JSON
         project_name = request.form.get('project_name')
         file3d_link = request.form.get('file3d_link')
-        panel_structure = request.form.get('panel_structure')
+        model_structure = request.form.get('model_structure')
         model_structure_identification = request.form.get('model_structure_identification')
 
         if not project_name or not file3d_link:
@@ -37,7 +37,7 @@ def add_project_routes(app):
 
         settings = Config.DEFAULT_PROJECT_SETTINGS
 
-        settings["panel_structure"] = panel_structure
+        settings["model_structure"] = model_structure
         settings["model_structure_identification"] = model_structure_identification
 
         settings = json.dumps(settings)
