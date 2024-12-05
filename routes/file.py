@@ -224,7 +224,7 @@ def add_files_routes(app):
                     output_path,
                     *args,
                 ],
-                capture_output=True, text=True, check=True, timeout=120
+                capture_output=True, text=True, check=True, timeout=1200
             )
             # print("Conversion completed successfully.")
 
