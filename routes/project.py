@@ -37,7 +37,7 @@ def add_project_routes(app):
 
         settings = Config.DEFAULT_PROJECT_SETTINGS
 
-        settings["model_structure"] = model_structure
+        settings["model_structure"] = json.dumps(model_structure)
         settings["model_structure_identification"] = model_structure_identification
 
         settings = json.dumps(settings)

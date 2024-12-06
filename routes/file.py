@@ -92,7 +92,7 @@ def add_files_routes(app):
             # print("GENERATED URL :",url)
             # print("USED KEY :",file_key)
 
-            url_to_send = url if Config.ENV == "production" else "https://www.myassembly.co/src/assets/models/guuidGlbFromIFC.glb"
+            url_to_send = url if Config.ENV == "production" else "https://www.myassembly.co/src/assets/models/1334.glb"
 
             # Redirect the user to the temporary URL for download
             return jsonify({"presigned_url": url_to_send}), 200
