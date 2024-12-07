@@ -198,7 +198,7 @@ def add_files_routes(app):
                     sendLog("success", {"logId" : 14, "LogMessage" : "IFC file uploaded successfully", "file_key" : s3_key, user_email : user_email})
 
                 except Exception as e:
-                    sendLog("error", {"logId" : 14, "LogMessage" : str(e)})
+                    sendLog("error", {"logId" : 15, "LogMessage" : str(e)})
                     return jsonify({"message": str(e)}), 500
 
 
@@ -221,8 +221,11 @@ def add_files_routes(app):
                 ],
                 capture_output=True, text=True, check=True, timeout=1200
             )
-            # print("Conversion completed successfully.")
 
+            end_t = time()
+            time_s = round(end_t - start_time, 2)
+            # print("Conversion completed successfully.")
+            sendLog("success", {"logId" : 16, "LogMessage" : "Conversion completed successfully", "file_key" : s3_key, "time_spent" : time_s})
             # Extract GUIDs and Descriptions
             # print("Opening IFC file for extraction.")
             ifc_file = ifcopenshell.open(input_path)
