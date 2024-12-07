@@ -6,6 +6,7 @@ from botocore.config import Config as BotoConfig
 from models.models import AppUser
 from flask import session
 from datetime import datetime
+from utils import sendLog
 
 #conversion imports
 import os
@@ -65,9 +66,11 @@ def add_files_routes(app):
             }), 201
 
         except NoCredentialsError:
+            sendLog("error", {"logId" : 0, "LogMessage" : "Credentials not available"})
             return jsonify({"message": "Credentials not available"}), 403
 
         except ClientError as e:
+            sendLog("error", {"logId" : 1, "LogMessage" : str(e)})
             return jsonify({"message": str(e)}), 500
 
     @app.route('/files/download', methods=['GET'])
@@ -99,9 +102,11 @@ def add_files_routes(app):
             # return redirect(url)
 
         except NoCredentialsError:
+            sendLog("error", {"logId" : 3, "LogMessage" : "Credentials not available"})
             return jsonify({"message": "Credentials not available"}), 403
 
         except ClientError as e:
+            sendLog("error", {"logId" : 4, "LogMessage" : str(e)})
             return jsonify({"message": str(e)}), 500
         
     # delete file from s3
@@ -137,9 +142,11 @@ def add_files_routes(app):
             return jsonify({"message": "File deleted successfully"}), 200
 
         except NoCredentialsError:
+            sendLog("error", {"logId" : 5, "LogMessage" : "Credentials not available"})
             return jsonify({"message": "Credentials not available"}), 403
 
         except ClientError as e:
+            sendLog("error", {"logId" : 6, "LogMessage" : str(e)})
             return jsonify({"message": str(e)}), 500
 
     @app.route('/files/convert_getsettings_upload', methods=['POST'])
@@ -181,47 +188,36 @@ def add_files_routes(app):
 
             with open(input_path, 'rb') as ifc_file:
                 # make sure the file name is unique adding timestampnumbers
-                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-                unique_filename = f"{user_email}_{filename}_{timestamp}"
-                s3_folder = "IFCs/"
-                s3_key = f"{s3_folder}{unique_filename}"
-                s3.upload_fileobj(ifc_file, Config.AWS_BUCKET_NAME, s3_key)
+                try:
+                    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                    unique_filename = f"{user_email}_{filename}_{timestamp}"
+                    s3_folder = "IFCs/"
+                    s3_key = f"{s3_folder}{unique_filename}"
+                    s3.upload_fileobj(ifc_file, Config.AWS_BUCKET_NAME, s3_key)
+
+                    sendLog("success", {"logId" : 14, "LogMessage" : "IFC file uploaded successfully", "file_key" : s3_key, user_email : user_email})
+
+                except Exception as e:
+                    sendLog("error", {"logId" : 14, "LogMessage" : str(e)})
+                    return jsonify({"message": str(e)}), 500
 
 
-            # print(f"File saved at {input_path}")
-
-            # Convert the file to GLB
-            # print("Generating output filename.")
             output_filename = f"{os.path.splitext(filename)[0]}.glb"
-            # print(f"Output filename: {output_filename}")
-
-            # print("Constructing output path.")
             output_path = f'./{output_filename}'#os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
-            # print(f"Output path: {output_path}")
-
-            # print("Starting IFC to GLB conversion.")
 
             # Dynamically locate IfcConvert in the current directory or subdirectories
             current_dir = os.getcwd()  # Get the current working directory
-            # print(f"Current directory: {current_dir}")
             ifcconvert_path = os.path.join(current_dir, 'IfcConvert')
-            # print(f"Constructed path: {ifcconvert_path}")
-            # Check if the executable exists at the constructed path
-            # if os.path.exists(ifcconvert_path):
-                # print(f"IfcConvert found at: {ifcconvert_path}")
-            # else:
-                # print("IfcConvert not found in current directory. Searching subdirectories.")
-                # raise FileNotFoundError(f"IfcConvert executable not found in {ifcconvert_path}")
 
-            
-
+            args = ["--use-element-guids"]
+            sendLog("info", {"logId" : 7, "LogMessage" : "Conversion started"})
             # Use the resolved path in the subprocess call
             subprocess.run(
                 [
                     ifcconvert_path,  # Use the full resolved path
                     input_path,
                     output_path,
-                    "--use-element-guids",
+                    *args,
                 ],
                 capture_output=True, text=True, check=True, timeout=1200
             )
@@ -280,18 +276,18 @@ def add_files_routes(app):
             }), 201
 
         except subprocess.CalledProcessError as e:
-            print(f"Conversion failed: {e.stderr}")
+            sendLog("error", {"logId" : 8, "LogMessage" : e.stderr})
             return jsonify({"message": "Conversion failed", "details": e.stderr}), 500
 
         except NoCredentialsError:
-            print("S3 credentials not available.")
+            sendLog("error", {"logId" : 9, "LogMessage" : "Credentials not available"})
             return jsonify({"message": "Credentials not available"}), 403
 
         except ClientError as e:
-            print(f"S3 client error: {e}")
+            sendLog("error", {"logId" : 10, "LogMessage" : str(e)})
             return jsonify({"message": str(e)}), 500
 
         except Exception as e:
-            print(f"Unexpected error: {str(e)}")
+            sendLog("error", {"logId" : 11, "LogMessage" : str(e)})
             return jsonify({"message": f"Unexpected error: {str(e)}"}), 500
 

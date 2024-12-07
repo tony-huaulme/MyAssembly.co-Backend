@@ -1,5 +1,6 @@
 from flask import jsonify, session
 from models.models import  db, AppUser, Project
+from utils import sendLog
 
 
 
@@ -40,6 +41,7 @@ def add_user_routes(app):
             db.session.delete(user)
             db.session.commit()
         except Exception as e:
+            sendLog("error", {"logId" : 13, "LogMessage" : e.stderr})
             return jsonify({"message": str(e)}), 400
         
         return jsonify({"message": f"User with ID {user_id} deleted successfully."}), 200

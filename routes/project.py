@@ -3,6 +3,8 @@ from models.models import db, Project, AppUser
 from flask import session
 from config import Config
 import json
+from utils import sendLog
+
 
 
 def add_project_routes(app):
@@ -53,6 +55,7 @@ def add_project_routes(app):
             db.session.commit()
 
         except Exception as e:
+            sendLog("error", {"logId" : 12, "LogMessage" : e.stderr})
             return jsonify({"message": str(e)}), 400
 
         return jsonify({
