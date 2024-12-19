@@ -103,7 +103,8 @@ def add_auth_routes(app,):
             return jsonify({'error': 'User already exists'}), 409
 
         # Create new user and hash the password
-        new_user = AppUser(email=email)
+        username = email.split('@')[0] or "Best_User"
+        new_user = AppUser(email=email, username=username)
         new_user.set_password(password)
         
         db.session.add(new_user)
