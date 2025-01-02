@@ -5,6 +5,8 @@ from oauthlib import oauth2
 from models.models import db, AppUser
 from config import Config
 from flask import session
+from utils import sendLog
+
 
 # Google OAuth2 configuration
 CLIENT_ID = Config.GOOGLE_OAUTH_CLIENT_ID
@@ -61,7 +63,7 @@ def add_auth_routes(app,):
         info = response_user_info.json()
 
         #extract what can give me the profile pic of the google account
-        print(info)
+        # print(info)
         # Check if user already exists
         user = AppUser.query.filter_by(email=info['email']).first()
         new_user = False
@@ -69,6 +71,10 @@ def add_auth_routes(app,):
             new_user = AppUser(username=info['name'], email=info['email'])
             db.session.add(new_user)
             db.session.commit()
+
+            sendLog("success", {
+            "NEW ACCOUNT Google, Email :" : info['email']},
+            "user")
 
         #set user id in session
         session['user_id'] = new_user.id if not user else user.id
@@ -112,6 +118,10 @@ def add_auth_routes(app,):
 
         session['user_id'] = new_user.id if not user else user.id
         session.permanent = True
+
+        sendLog("success", {
+            "NEW ACCOUNT email+pw, Email :" : email},
+            "user")
 
         return jsonify({'message': 'User registered successfully', 'user': {'id': new_user.id, 'email': new_user.email}}), 201
 

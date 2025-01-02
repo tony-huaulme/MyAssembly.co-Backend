@@ -26,7 +26,13 @@ SEVERITY_COLORS = {
     "debug": 10197915    # Purple
 }
 
-def sendLog(severity="debug", message=None):
+HOOKS = {
+    "backendLog"    : "https://discord.com/api/webhooks/1314545485222117446/TqlWoYuaQj0znUMXLy2uyY2JxelAuTLxTPrdzM6alLprsWrN18bOSgoJV4aHOsKwdoly",
+    "project"       : "https://discord.com/api/webhooks/1300515818399858780/-gn8HVjVh1h7c6h1X_lHC5g0CNzFxoah7htfcC9R7GnXbz4ObhGgd6BpzdortaAjsmWG",
+    "user"          : "https://discord.com/api/webhooks/1298363498828664918/lb-HObNM5pptjnRRXr_LCe2GfeeBAGrrJdA-Kgam9VAfW_lVBqBTszQ3xRbvqJ7R7ZEM"
+}
+
+def sendLog(severity="debug", message="NoMessageAsArg", webhookLink="backendLog"):
     """
     Sends a Discord webhook with an embed, styled by severity level.
 
@@ -50,7 +56,8 @@ def sendLog(severity="debug", message=None):
     """
     
     # Define your webhook URL here
-    webhook_url = "https://discord.com/api/webhooks/1314545485222117446/TqlWoYuaQj0znUMXLy2uyY2JxelAuTLxTPrdzM6alLprsWrN18bOSgoJV4aHOsKwdoly"
+    webhook_url = HOOKS[webhookLink]
+    
     
     def process_webhook():
         # Get color based on severity, default to black (0) if unknown

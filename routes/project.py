@@ -4,7 +4,7 @@ from flask import session
 from config import Config
 import json
 from utils import sendLog
-
+from utils import sendLog
 
 
 def add_project_routes(app):
@@ -26,6 +26,7 @@ def add_project_routes(app):
         model_structure_identification = request.form.get('model_structure_identification')
 
         if not project_name or not file3d_link:
+            sendLog("error", {"logId": 8, "LogMessage": "Project name and file3d link are required"})
             return jsonify({"message": "Project name and file3d link are required"}), 400
 
         user_id = session.get('user_id')
@@ -57,6 +58,10 @@ def add_project_routes(app):
         except Exception as e:
             sendLog("error", {"logId" : 12, "LogMessage" : e.stderr})
             return jsonify({"message": str(e)}), 400
+        sendLog("success", {
+            "ProjectCreated" : f"https://www.myassembly.co/ModelFromProjectId?projectId={new_project.id}", 
+            "by": new_project.user_id},
+            "project")
 
         return jsonify({
             "id": new_project.id,

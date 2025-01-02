@@ -95,7 +95,7 @@ def add_files_routes(app):
             # print("GENERATED URL :",url)
             # print("USED KEY :",file_key)
 
-            url_to_send = url if Config.ENV == "production" else "https://www.myassembly.co/src/assets/models/1334.glb"
+            url_to_send = url if Config.ENV == "production" else "https://www.myassembly.co/src/assets/models/DemoModel.glb"
 
             # Redirect the user to the temporary URL for download
             return jsonify({"presigned_url": url_to_send}), 200
@@ -279,8 +279,10 @@ def add_files_routes(app):
             }), 201
 
         except subprocess.CalledProcessError as e:
-            sendLog("error", {"logId" : 8, "LogMessage" : e.stderr})
-            return jsonify({"message": "Conversion failed", "details": e.stderr}), 500
+            error_message = e.stderr or e.stdout or "No error output captured"
+            sendLog("error", {"logId": 8, "LogMessage": error_message})
+            return jsonify({"message": "Conversion failed", "details": error_message}), 500
+
 
         except NoCredentialsError:
             sendLog("error", {"logId" : 9, "LogMessage" : "Credentials not available"})
